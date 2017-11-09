@@ -8,7 +8,7 @@ import datetime
 info_file = 'usr_info.txt'
 
 class Cduty:
-	def __init__(self,type,content,resp_email,start_day,start_id = 0):
+	def __init__(self,type,content,resp_email,start_day,start_id):
 		self.tp = type	
 		self.st_day = start_day
 		self.content = content
@@ -26,6 +26,7 @@ class Cduty:
 		#如果服务器安装了sendmail（邮件传输代理程序）就可以去除第三个参数 不然只能使用163邮箱
 		sender.add_text(self.content)
 		sender.sendto('自习室通知',self.addr[self.cur_id])
+		
 		self.cur_id = self.cur_id + 1
 		if self.cur_id >= len(self.addr):
 			self.cur_id = 0;
@@ -34,9 +35,11 @@ class Cduty:
 	def judge(self,ct_day,week_time,day_time):
 		#判断天数是否变化（以天数变化作为驱动,即每个任务每日最多发一封,如果要频繁发的话可以改成小时、分钟）
 		
-		#print day_time
 		
 		d = datetime.datetime.now()
+		
+		print self.tp,d.weekday(),week_time[self.tp][d.weekday()]
+		
 		if ct_day == self.st_day:
 			return False
 		

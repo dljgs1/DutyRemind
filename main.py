@@ -8,7 +8,7 @@ import datetime
 emails_file = 'emails.conf'
 inform_file = 'list.conf'
 type_file = 'timetype.conf'
-
+init_file = 'init.conf'
 
 def get_file_content(fname):
 	buf = ""
@@ -40,11 +40,18 @@ with codecs.open(emails_file,'r','utf-8')as fin:
 #print receivers
 #任务槽
 duties = []
+init_id = []
+#开始日期（从这一天的第二天开始运行）初始化为-1，即首次满足时间条件的均立刻发送：
+start_day = -1
 
-#开始日期（从这一天的第二天开始运行）：
-start_day = 7
-
+with codecs.open(init_file,'r','utf-8')as fin:
+	for line in fin.readlines():
+		line = line.strip('\r\n')
+		init_id.append(str2int(line))
+		
+		
 with codecs.open(inform_file,'r','utf-8')as fin:
+	ct = 0
 	for line in fin.readlines():
 		line = line.strip('\r\n')
 		s = line.split('\t')
@@ -55,8 +62,10 @@ with codecs.open(inform_file,'r','utf-8')as fin:
 		
 		for id in s[1:-1]:#for each partners
 			ems.append(receivers[str2int(id)])
-		temp = duty.Cduty(tp,content,ems,start_day)
+		
+		temp = duty.Cduty(tp,content,ems,start_day,init_id[ct])
 		duties.append(temp)
+		ct = ct + 1
 		
 
 		
@@ -81,8 +90,9 @@ while True:
 	d = datetime.datetime.now()
 	for it in duties:
 		if it.judge(d.day,week_time,day_time):#一旦判断成功 st变量修改
+			n = it.cur_id
 			it.send()
-			print u'发送了一封去往%d号的邮件'%it.cur_id
+			print u'发送了一封去往%d号的邮件'%n
 	print d	
 	time.sleep(40)#挂起40s
 	
